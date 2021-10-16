@@ -18,9 +18,14 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
-        'name',
+        'fullname',
         'email',
-        'password',
+        'phone_number',
+        'address',
+        'birth_date',
+        'gender',
+        'avatar_url',
+        'role'
     ];
 
     /**
@@ -41,4 +46,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected $table = 'users';
 }
