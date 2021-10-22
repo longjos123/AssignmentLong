@@ -36,9 +36,12 @@
                 <td><span style="font-size: 15px;" class="badge badge-success">${{($userTour->tour->price)*($userTour->num_people)}}</span></td>
                 <td>{{$userTour->start_date}}</td>
                 <td>{{$userTour->end_date}}</td>
+
                 <td style="color: {{($userTour->status) == 0? '#c13a6b':'green'}}">
                     @if($userTour->confirm_tour == 1)
                         {{($userTour->status) == 0?'Đang xử lí':'Đã duyệt'}}
+                    @else
+                        Đang xử lí
                     @endif
                 </td>
                 <td>

@@ -23,7 +23,6 @@ class Tour extends Model
     protected $fillable = [
         'name',
         'image',
-        'num_day',
         'transport_id',
         'description',
         'num_day',

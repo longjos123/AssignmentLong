@@ -16,7 +16,7 @@ class UserTourController extends Controller
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function index(){
-        $userTours = UserTour::where('confirm_tour','=','1')->get();
+        $userTours = UserTour::where('confirm_tour', '=',1)->get();
         $hotels = Hotel::all();
         $tours = Tour::all();
         $users = User::all();
@@ -64,6 +64,7 @@ class UserTourController extends Controller
             'hotel_id' => $request->hotel_id,
             'start_date' => $request->start_date
         ]);
+        $userTour->status = $request->status;
         $userTour->save();
 
         return redirect(route('tour_user.index'));
@@ -83,6 +84,9 @@ class UserTourController extends Controller
         $end_date = strtotime(date("Y-m-d", strtotime($request->start_date)) . " +$dayTour days");
         //Add db
         $tourUser->fill($request->all());
+        $tourUser->name = '-';
+        $tourUser->confirm_tour = 1;
+        $tourUser->status = 1;
         $tourUser->fixed_price = $fixedPrice;
         $tourUser->end_date = date("Y-m-d",$end_date);
 

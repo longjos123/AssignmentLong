@@ -44,6 +44,13 @@
                         <label for="">Ngày khởi hành</label>
                         <input name="start_date" style="width: 500px" type="date" class="form-control" value="{{$userTour->start_date}}">
                     </div>
+                    <div class="form-group">
+                        <label>Trạng thái</label>
+                        <select name="status" style="width: 500px" class="form-control">
+                            <option value="0" style="color: #c13a6b">Đang xử lí</option>
+                            <option value="1" style="color: green">Duyệt</option>
+                        </select>
+                    </div>
                 </div>
                 <button
                     onclick="return confirm('Xác nhận thay đổi!!!');"

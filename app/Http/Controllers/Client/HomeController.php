@@ -7,6 +7,7 @@ use App\Models\Countries;
 use App\Models\News;
 use App\Models\Tour;
 use App\Models\UserTour;
+use App\Repositories\Contracts\RepositoryInterface\TourRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +19,14 @@ class HomeController extends Controller
      * Lấy dữ liệu tour và news show ra homepage client
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
+    protected $tourRepo;
+    public function __construct(TourRepositoryInterface $tourRepo)
+    {
+        $this->tourRepo = $tourRepo;
+    }
     public function index()
     {
-        $tours = Tour::limit(6)->get();
+        $tours = $this->tourRepo->getTour();
         $tours->load('tourCountries');
         $news = News::limit(3)->get();
 
@@ -111,11 +117,12 @@ class HomeController extends Controller
         $tourUser->fill([
             'user_id' => $user_id,
             'tour_id' => $id,
-            'name' => $request->name,
             'num_people' => $request->num_people,
             'phone_number' => $request->phone_number,
             'start_date' => $request->start_date,
         ]);
+        $tourUser->name = $request->name;
+        $tourUser->confirm_tour = 0;
         $tourUser->status = 0;
         $tourUser->end_date = date('Y-m-d', $end_date);
         $tourUser->save();
