@@ -25,22 +25,17 @@ class TourService
      */
     public function addTour($request)
     {
-        $tour = resolve('Tour');
-        $tour->fill($request->all());
-        $this->imageProcessing($request, $tour);
+        $tour = [
+            'name' => $request->name,
+            'num_day' => $request->num_day,
+            'transport_id' => $request->transport_id,
+            'description' => $request->description,
+            'price' => $request->price,
+            'countries_id' => $request->countries_id,
+        ];
+        $tour['image'] = $this->imageProcessing($request);
 
-        $tourAdd = $tour->toArray();
-//        $tour = [
-//            'name' => $request->name,
-//            'num_day' => $request->num_day,
-//            'transport_id' => $request->transport_id,
-//            'description' => $request->description,
-//            'price' => $request->price,
-//            'countries_id' => $request->countries_id,
-//        ];
-
-
-        $this->tourRepo->create($tourAdd);
+        $this->tourRepo->create($tour);
     }
 
     public function updateTour($id, $request)
@@ -53,7 +48,9 @@ class TourService
             'price' => $request->price,
             'countries_id' => $request->countries_id,
         ];
-        $this->imageProcessing($request, $tourEdit);
+        if($request->hasFile('image')){
+            $tourEdit['image'] = $this->imageProcessing($request);
+        }
         $this->tourRepo->update($id, $tourEdit);
     }
 
@@ -62,11 +59,11 @@ class TourService
      * @param $request
      * @param $arr
      */
-    public function imageProcessing($request, $arr)
+    public function imageProcessing($request)
     {
-        if($request->hasFile('image')){
-            $arr['image'] = $request->file('image')->storeAs('uploads/imgTour', uniqid() . '-' . $request->image->getClientOriginalName());
-        }
+        $image = $request->file('image')->storeAs('uploads/imgTour', uniqid() . '-' . $request->image->getClientOriginalName());
+
+        return $image;
     }
 
 

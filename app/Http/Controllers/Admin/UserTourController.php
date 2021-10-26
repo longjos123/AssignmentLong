@@ -7,19 +7,67 @@ use App\Models\Hotel;
 use App\Models\Tour;
 use App\Models\User;
 use App\Models\UserTour;
+use App\Repositories\Contracts\RepositoryInterface\HotelRepositoryInterface;
+use App\Repositories\Contracts\RepositoryInterface\TourRepositoryInterface;
+use App\Repositories\Contracts\RepositoryInterface\UserRepositoryInterface;
+use App\Repositories\Contracts\RepositoryInterface\UserTourRepositoryInterface;
+use App\Services\UserTourService;
 use Illuminate\Http\Request;
 
 class UserTourController extends Controller
 {
     /**
+     * @var
+     */
+    protected $userRepo;
+    /**
+     * @var
+     */
+    protected $userTourRepo;
+    /**
+     * @var
+     */
+    protected $hotelRepo;
+    /**
+     * @var
+     */
+    protected $tourRepo;
+    /**
+     * @var
+     */
+    protected $userTourService;
+
+    /**
+     * @param UserRepositoryInterface $userRepository
+     * @param UserTourRepositoryInterface $userTourRepository
+     * @param HotelRepositoryInterface $hotelRepository
+     * @param TourRepositoryInterface $tourRepository
+     */
+    public function __construct
+    (
+        UserRepositoryInterface $userRepository,
+        UserTourRepositoryInterface $userTourRepository,
+        HotelRepositoryInterface $hotelRepository,
+        TourRepositoryInterface $tourRepository,
+        UserTourService $userTourService
+    )
+    {
+        $this->userRepo = $userRepository;
+        $this->userTourRepo = $userTourRepository;
+        $this->hotelRepo = $hotelRepository;
+        $this->tourRepo = $tourRepository;
+        $this->userTourService = $userTourService;
+    }
+
+    /**
      * show tour booked
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function index(){
-        $userTours = UserTour::where('confirm_tour', '=',1)->get();
-        $hotels = Hotel::all();
-        $tours = Tour::all();
-        $users = User::all();
+        $userTours = $this->userTourRepo->getTourConfirm();
+        $hotels = $this->hotelRepo->getAll();
+        $tours = $this->tourRepo->getAll();
+        $users = $this->userRepo->getUserCustomer();
         $userTours->load('user','tour', 'hotel');
 
         return view('admin.user_tour.index', compact('userTours','users','tours','hotels'));
@@ -32,7 +80,12 @@ class UserTourController extends Controller
      */
     public function delete($id)
     {
-        UserTour::destroy($id);
+        try {
+            $this->userTourRepo->delete($id);
+        }catch (\Exception $exception){
+            return back()->withErrors($exception->getMessage())->withInput();
+        }
+
         return redirect()->back();
     }
 
@@ -43,8 +96,8 @@ class UserTourController extends Controller
      */
     public function formEdit($id)
     {
-        $userTour = UserTour::find($id);
-        $hotels = Hotel::all();
+        $userTour = $this->userTourRepo->find($id);
+        $hotels = $this->hotelRepo->getAll();
         $userTour->load('hotel','user','tour');
 
         return view('admin.user_tour.edit', compact('userTour','hotels'));
@@ -57,40 +110,23 @@ class UserTourController extends Controller
      */
     public function postEdit($id, Request $request)
     {
-        $userTour = UserTour::find($id);
-        $userTour ->fill([
-            'phone_number' => $request->phone_number,
-            'num_people' => $request->num_people,
-            'hotel_id' => $request->hotel_id,
-            'start_date' => $request->start_date
-        ]);
-        $userTour->status = $request->status;
-        $userTour->save();
+        $this->userTourService->update($id, $request);
 
         return redirect(route('tour_user.index'));
     }
 
+    /**
+     * Book tour
+     * @param Request $request array
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function bookTour(Request $request)
     {
-        //create booking tour
-        $tourUser = new UserTour();
-        //make price tour
-        $idNewTourBooking = $request->tour_id;
-        $tour = Tour::find($idNewTourBooking);
-        $priceTour = $tour->price;
-        $fixedPrice = ($request->num_people) * $priceTour;
-        ////make end date tour
-        $dayTour = $tour->num_day;
-        $end_date = strtotime(date("Y-m-d", strtotime($request->start_date)) . " +$dayTour days");
-        //Add db
-        $tourUser->fill($request->all());
-        $tourUser->name = '-';
-        $tourUser->confirm_tour = 1;
-        $tourUser->status = 1;
-        $tourUser->fixed_price = $fixedPrice;
-        $tourUser->end_date = date("Y-m-d",$end_date);
-
-        $tourUser->save();
+        try {
+            $this->userTourService->add($request);
+        }catch (\Exception $exception){
+            return back()->withErrors($exception->getMessage())->withInput();
+        }
 
         return redirect()->back();
     }

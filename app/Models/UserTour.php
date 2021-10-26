@@ -14,10 +14,15 @@ class UserTour extends Model
     protected $fillable = [
         'user_id',
         'tour_id',
+        'name',
         'num_people',
         'hotel_id',
         'phone_number',
         'start_date',
+        'end_date',
+        'confirm_tour',
+        'status',
+        'fixed_price'
     ];
 
     public function user()

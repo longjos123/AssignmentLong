@@ -12,4 +12,8 @@ class UserTourRepository extends BaseRepository implements UserTourRepositoryInt
     {
         return UserTour::class;
     }
+    public function getTourConfirm()
+    {
+        return UserTour::where('confirm_tour', '=',1)->get();
+    }
 }

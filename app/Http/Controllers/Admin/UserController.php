@@ -11,10 +11,21 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    /**
+     * @var UserRepositoryInterface
+     */
     protected $userRepo;
+    /**
+     * @var UserService
+     */
     protected $userService;
 
-    public function __construct(
+    /**
+     * @param UserRepositoryInterface $userRepo
+     * @param UserService $userService
+     */
+    public function __construct
+    (
         UserRepositoryInterface $userRepo,
         UserService $userService
     )
@@ -40,32 +51,56 @@ class UserController extends Controller
      */
     public function add(Request $request)
     {
-        $this->userService->add($request);
+        try {
+            $this->userService->add($request);
+        }catch (\Exception $exception){
+            return back()->withErrors($exception->getMessage())->withInput();
+        }
 
         return redirect(route('user.index'));
     }
+
+    /**
+     * Delete User
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function delete($id)
     {
-        User::destroy($id);
+        try {
+            $this->userRepo->delete($id);
+        }catch (\Exception $exception){
+            return back()->withErrors($exception->getMessage())->withInput();
+        }
 
         return redirect()->back();
     }
+
+    /**
+     * View to edit User
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
     public function viewEdit($id)
     {
-        $user = User::find($id);
+        $user = $this->userRepo->find($id);
 
         return view('admin.users.edit',compact('user'));
     }
+
+    /**
+     * post data user edit
+     * @param $id
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function postEdit($id, Request $request)
     {
-        $user = User::find($id);
-        $user->fill($request->all());
-        $user->password = Hash::make($request->password);
-
-        if($request->hasFile('image')){
-            $user->avatar_url    = $request->file('image')->storeAs('uploads/imgUser', uniqid() . '-' . $request->image->getClientOriginalName());
+        try {
+            $this->userService->update($id, $request);
+        }catch (\Exception $exception){
+            return back()->withErrors($exception->getMessage())->withInput();
         }
-        $user->save();
 
         return redirect(route('user.index'));
     }

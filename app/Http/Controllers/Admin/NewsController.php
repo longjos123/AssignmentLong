@@ -5,55 +5,83 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\Tour;
+use App\Repositories\Contracts\RepositoryInterface\NewsRepositoryInterface;
+use App\Services\NewsService;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+    protected $newsRepo;
+
+    protected $newsService;
+
+    /**
+     * @param NewsRepositoryInterface $newsRepository
+     */
+    public function __construct(
+        NewsRepositoryInterface $newsRepository,
+        NewsService $newsService
+    )
+    {
+        $this->newsRepo = $newsRepository;
+        $this->newsService = $newsService;
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
     public function index()
     {
-        $news = News::all();
+        $news = $this->newsRepo->getAll();
 
         return view('admin.news.index', compact('news'));
     }
+
+    /**
+     * @param $id int
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function delete($id)
     {
-        News::destroy($id);
+        $this->newsRepo->delete($id);
 
         return redirect()->back();
     }
+
+    /**
+     * view edit
+     * @param $id int
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
     public function formEdit($id)
     {
-        $news = News::find($id);
+        $news = $this->newsRepo->find($id);
 
         return view('admin.news.edit',compact('news'));
     }
+
+    /**
+     * post news edit
+     * @param $id int
+     * @param Request $request array
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function postEdit($id, Request $request)
     {
-        $news = News::find($id);
-        $news->fill($request->all());
-        if($request->hasFile('image')){
-            $news->image = $request->file('image')->storeAs('uploads/imgNews', uniqid() . '-' . $request->image->getClientOriginalName());
-        }
-
-        $news->save();
+        $this->newsService->update($id, $request);
 
         return redirect(route('news.index'));
     }
     public function add(Request $request)
     {
-        $news = new News();
-        $news->fill($request->all());
-        if($request->hasFile('image')){
-            $news->image = $request->file('image')->storeAs('uploads/imgNews', uniqid() . '-' . $request->image->getClientOriginalName());
-        }
-        $news->save();
+        $this->newsService->add($request);
 
         return redirect(route('news.index'));
     }
     public function viewDetail(Request $request)
     {
         $id = $request->query('id');
-        $news = News::find($id);
+        $news = $this->newsRepo->find($id);
         return response()->json($news);
     }
 }

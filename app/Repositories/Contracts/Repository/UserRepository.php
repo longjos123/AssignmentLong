@@ -12,4 +12,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return User::class;
     }
+    public function getUserCustomer()
+    {
+        return User::where('role','=',0)->get();
+    }
 }
