@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddTourRequest;
 use App\Repositories\Contracts\RepositoryInterface\CountriesRepositoryInterface;
 use App\Repositories\Contracts\RepositoryInterface\TourRepositoryInterface;
 use App\Repositories\Contracts\RepositoryInterface\TransportRepositoryInterface;
@@ -60,15 +61,16 @@ class TourController extends Controller
 
     /**
      * Lưu tour
-     * @param Request $request
+     * @param AddTourRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function add(Request $request)
+    public function add(AddTourRequest $request)
     {
         try {
-            $this->tourService->addTour($request);
-        }catch (\Exception $exception){
-            return back()->withError($exception->getMessage('Thêm tour thất bại!!!'))->withInput();
+            $data = $request->validated();
+            $this->tourService->addTour($data);
+        } catch (\Exception $exception) {
+            return back()->withError($exception->getMessage('đâ'))->withInput();
         }
 
         return redirect(route('tour.index'));

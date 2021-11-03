@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Tour;
 use App\Models\UserTour;
+use App\Repositories\Contracts\RepositoryInterface\TourRepositoryInterface;
 use App\Repositories\Contracts\RepositoryInterface\UserTourRepositoryInterface;
 
 class UserTourService
@@ -12,13 +13,14 @@ class UserTourService
      * @var UserTourRepositoryInterface
      */
     protected $userTourRepo;
-
+    protected $tourRepo;
     /**
      * @param UserTourRepositoryInterface $userTourRepository
      */
-    public function __construct(UserTourRepositoryInterface $userTourRepository)
+    public function __construct(UserTourRepositoryInterface $userTourRepository, TourRepositoryInterface $tourRepository)
     {
         $this->userTourRepo = $userTourRepository;
+        $this->tourRepo = $tourRepository;
     }
 
     /**
@@ -35,7 +37,7 @@ class UserTourService
             'status' => $request->status
         ];
 
-        $this->userTourRepo->update($id, $userTour);
+        return $this->userTourRepo->update($id, $userTour);
     }
 
     /**
@@ -45,7 +47,7 @@ class UserTourService
     public function add($request)
     {
         //Get tour booking
-        $tour = Tour::find($request->tour_id);
+        $tour = $this->tourRepo->find($request->tour_id);
 
         $booking = [
             'user_id' => $request->user_id,
@@ -61,6 +63,6 @@ class UserTourService
             'end_date' => date("Y-m-d", strtotime(date("Y-m-d", strtotime($request->start_date)) . " +$tour->num_day days"))
         ];
 
-        $this->userTourRepo->create($booking);
+        return $this->userTourRepo->create($booking);
     }
 }

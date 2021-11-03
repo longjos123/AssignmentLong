@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Http\Requests\AddTourRequest;
 use App\Repositories\Contracts\RepositoryInterface\TourRepositoryInterface;
+use Symfony\Component\HttpFoundation\Request;
+
 
 class TourService
 {
@@ -19,24 +22,6 @@ class TourService
         $this->tourRepo = $tourRepository;
     }
 
-    /**
-     * add tour
-     * @param $request
-     */
-    public function addTour($request)
-    {
-        $tour = [
-            'name' => $request->name,
-            'num_day' => $request->num_day,
-            'transport_id' => $request->transport_id,
-            'description' => $request->description,
-            'price' => $request->price,
-            'countries_id' => $request->countries_id,
-        ];
-        $tour['image'] = $this->imageProcessing($request);
-
-        $this->tourRepo->create($tour);
-    }
 
     public function updateTour($id, $request)
     {
@@ -55,16 +40,27 @@ class TourService
     }
 
     /**
-     * Xử lí ảnh
-     * @param $request
-     * @param $arr
+     * add tour
+     * @param AddTourRequest $request
      */
-    public function imageProcessing($request)
+    public function addTour($data)
     {
-        $image = $request->file('image')->storeAs('uploads/imgTour', uniqid() . '-' . $request->image->getClientOriginalName());
+        if(!empty($data['image'])) {
+            $data['image'] = $this->imageProcessing($data['image']);
+        }
 
-        return $image;
+        return $this->tourRepo->create($data);
     }
 
 
+    /**
+     * Xử lí đường dẫn ảnh
+     * @param $request
+     * @param $arr
+     */
+    public function imageProcessing($image)
+    {
+        $storedPath = $image->move('uploads/imgTour', $image->getClientOriginalName());
+        return $storedPath;
+    }
 }

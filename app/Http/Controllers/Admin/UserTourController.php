@@ -83,7 +83,7 @@ class UserTourController extends Controller
         try {
             $this->userTourRepo->delete($id);
         }catch (\Exception $exception){
-            return back()->withErrors($exception->getMessage())->withInput();
+            return back()->withErrors($exception->getMessage('Xóa thành công!!!'))->withInput();
         }
 
         return redirect()->back();

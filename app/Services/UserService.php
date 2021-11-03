@@ -39,12 +39,14 @@ class UserService
             'role' => $request->role
         ];
 
-        $user['avatar_url'] = $this->imageProcessing($request);
+        if($request->hasFile('image')) {
+            $user['avatar_url'] = $this->imageProcessing($request);
+        }
         $this->userRepo->create($user);
     }
 
     /**
-     * Post edit user
+     * Post edit user[
      * @param $id
      * @param $request
      */

@@ -34,4 +34,6 @@
 {{-- <script src="{{asset('admin-theme/dist/js/pages/dashboard.js')}}"></script> --}}
 <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 <script> CKEDITOR.replace('editor1'); </script>
+
+</script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>

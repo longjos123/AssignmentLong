@@ -42,8 +42,11 @@ class UserServiceTest extends TestCase
     {
         $user = $this->addUser();
         $userOb = (object) $user;
-
         $this->userRepository->shouldReceive('create')->andReturnTrue();
+
+        if($userOb->hasFile('image')){
+
+        }
         $actual = $this->target->add($userOb);
 
         $this->assertTrue($actual);
@@ -65,7 +68,7 @@ class UserServiceTest extends TestCase
             'birth_date' => '2021-12-1',
             'gender' => 1,
             'role' => 0,
-            'image' => 'dafsgdhfsffgh.jpg'
+
         ];
     }
 }
