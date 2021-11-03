@@ -1,0 +1,9 @@
+.add-product-preview-img{
+    width: 100%;
+    min-height: 250px;
+    border: 1px solid #ccc;
+    margin-bottom: 7px;
+}
+#checkbox-service{
+    width: 20px;
+}
